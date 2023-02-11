@@ -61,22 +61,30 @@ public class OrderRepository {
                 Integer.parseInt(T.substring(3,5));
         int count=0;
         for(Order order:partnersTotalOrder.get(partnerId)){
-            String deliveryTime=order.getDeliveryTime();
-            if(deliveryTime.compareTo(T)>0){
+            int deliveryTime=order.getDeliveryTime();
+            if(deliveryTime>time){
                 count++;
             }
         }
         return count;
     }
     public String getLastDeliveryTimeByPartnerId(String partnerId){
-        String  lastDeliveryTime="00:00";
+        int  lastDeliveryTime=0;
         for(Order order:partnersTotalOrder.get(partnerId)){
-            String deliveryTime=order.getDeliveryTime();
-            if(deliveryTime.compareTo(lastDeliveryTime)>0){
+            int deliveryTime=order.getDeliveryTime();
+            if(deliveryTime>lastDeliveryTime){
                 lastDeliveryTime=deliveryTime;
             }
         }
-        return lastDeliveryTime;
+        int hh=lastDeliveryTime/60;
+        int mm=lastDeliveryTime%60;
+        String HH="";
+        String MM="";
+        if(hh<10) HH="0";
+        if(mm<10) MM="0";
+        HH=HH+hh;
+        MM=MM+mm;
+        return HH+":"+MM;
     }
     public  String deletePartnerById(String  partnerId){
          deliveryPartnerMap.remove(partnerId);
@@ -88,7 +96,7 @@ public class OrderRepository {
          return "DeliveryPartner has been deleted successfully";
     }
     public String deleteOrderById(String orderId){
-        if(notAssigned.contains(orderId))
+        if(notAssigned.contains(orderMap.get(orderId)))
         {
             notAssigned.remove(orderMap.get(orderId));
             return "Order has been deleted successfully";
