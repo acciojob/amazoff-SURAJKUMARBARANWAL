@@ -27,6 +27,7 @@ public class OrderRepository {
     }
 
     public String addOrderPartnerPair(String orderId,String partnerId){
+        if(!orderMap.containsKey(orderId) || !deliveryPartnerMap.containsKey(partnerId)) return null;
         notAssigned.remove(orderId);
         int x=deliveryPartnerMap.get(partnerId).getNumberOfOrders();
         deliveryPartnerMap.get(partnerId).setNumberOfOrders(x+1);
@@ -39,24 +40,30 @@ public class OrderRepository {
         return "Order assignment to partner";
     }
     public Order  getOrderById(String orderId){
+        if(!orderMap.containsKey(orderId)) return null;
         return orderMap.get(orderId);
     }
     public DeliveryPartner   getPartnerById(String partnerId){
+        if(!deliveryPartnerMap.containsKey(partnerId)) return null;
         return deliveryPartnerMap.get(partnerId);
     }
     public int getOrderCountByPartnerId(String partnerId){
+        if(!deliveryPartnerMap.containsKey(partnerId) || !partnersTotalOrder.containsKey(partnerId)) return 0;
         return partnersTotalOrder.get(partnerId).size();
     }
     public List<Order> getOrdersByPartnerId(String partnerId){
+        if(!deliveryPartnerMap.containsKey(partnerId) || !partnersTotalOrder.containsKey(partnerId)) return null;
         return partnersTotalOrder.get(partnerId);
     }
     public List<Order> getAllOrders(){
+
         return new ArrayList<>(orderMap.values());
     }
     public  int getCountOfUnassignedOrders(){
         return  notAssigned.size();
     }
     public  int getOrdersLeftAfterGivenTimeByPartnerId(String partnerId,String T){
+        if(!deliveryPartnerMap.containsKey(partnerId) || !partnersTotalOrder.containsKey(partnerId)) return 0;
         int time=Integer.parseInt(T.substring(0,2))*60+
                 Integer.parseInt(T.substring(3,5));
         int count=0;
@@ -69,6 +76,7 @@ public class OrderRepository {
         return count;
     }
     public String getLastDeliveryTimeByPartnerId(String partnerId){
+        if(!deliveryPartnerMap.containsKey(partnerId) || !partnersTotalOrder.containsKey(partnerId)) return  null;
         int  lastDeliveryTime=0;
         for(Order order:partnersTotalOrder.get(partnerId)){
             int deliveryTime=order.getDeliveryTime();
@@ -87,7 +95,9 @@ public class OrderRepository {
         return HH+":"+MM;
     }
     public  String deletePartnerById(String  partnerId){
+        if(!deliveryPartnerMap.containsKey(partnerId)) return null;
          deliveryPartnerMap.remove(partnerId);
+         if(!partnersTotalOrder.containsKey(partnerId)) return null;
          for(Order order:partnersTotalOrder.get(partnerId)){
              orderDeliveryPartnerMap.remove(order);
              notAssigned.add(order.getId());
@@ -96,12 +106,13 @@ public class OrderRepository {
          return "DeliveryPartner has been deleted successfully";
     }
     public String deleteOrderById(String orderId){
+        if(!orderMap.containsKey(orderId)) return null;
         if(notAssigned.contains(orderMap.get(orderId)))
         {
             notAssigned.remove(orderMap.get(orderId));
             return "Order has been deleted successfully";
         }
-
+        if(!orderDeliveryPartnerMap.containsKey(orderMap.get(orderId))) return "Order has been deleted successfully";
         DeliveryPartner temp=orderDeliveryPartnerMap.get(orderMap.get(orderId));
         partnersTotalOrder.get(temp.getId()).remove(orderMap.get(orderId));
         orderDeliveryPartnerMap.remove(orderMap.get(orderId));
